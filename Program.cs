@@ -16,7 +16,14 @@ namespace Setup_RadioPlayer
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+
+            using (var selector = new LanguageSelectorForm())
+            {
+                if (selector.ShowDialog() == DialogResult.OK)
+                {
+                    Application.Run(new MainForm());
+                }
+            }
         }
     }
 }

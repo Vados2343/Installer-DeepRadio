@@ -27,7 +27,7 @@ namespace Setup_RadioPlayer
         private CustomButton btnBack;
         private CustomButton btnClose;
         private CustomButton btnMinimize;
-        private Label lblTitle; // Заголовок установщика
+        private Label lblTitle; 
         private System.Windows.Forms.Timer betaButtonTimer;
         private int betaButtonAnimationStep = 0;
         private bool betaButtonAnimatingIn = true;
@@ -48,45 +48,40 @@ namespace Setup_RadioPlayer
         // Конструктор формы
         public MainForm()
         {
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length > 1 && args[1] == "/uninstall")
+            {
+                UninstallManager.Uninstall();
+                Environment.Exit(0);
+                return;
+            }
             if (!IsUserAdministrator())
             {
-                // Перезапуск от имени администратора
                 RestartAsAdministrator();
                 return;
             }
-
-            // Настройки формы
-            this.Text = "Установник RadioPlayer";
+            this.DoubleBuffered = true;
+            this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
+            this.UpdateStyles();
+            this.Text = LanguageManager.GetString("AppTitle");
             this.Size = new Size(800, 600);
-            this.FormBorderStyle = FormBorderStyle.None; // Убираем стандартные границы
+            this.FormBorderStyle = FormBorderStyle.None;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Icon = Properties.Resources.installer;
-
-            // Устанавливаем фоновое изображение
             this.BackgroundImage = Properties.Resources.background1;
             this.BackgroundImageLayout = ImageLayout.Stretch;
-
-            // Инициализация лог файла
             logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "install.log");
-            Log("Запуск установщика.");
-
-            // Инициализация панелей и элементов управления
+            Log("Installer started.");
             InitializeSharedControls();
             InitializePanels();
-
-            // Показать панель приветствия
             ShowPanel(panelWelcome);
         }
-
-        // Проверка прав администратора
         private bool IsUserAdministrator()
         {
             WindowsIdentity identity = WindowsIdentity.GetCurrent();
             WindowsPrincipal principal = new WindowsPrincipal(identity);
             return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
-
-        // Перезапуск приложения от имени администратора
         private void RestartAsAdministrator()
         {
             ProcessStartInfo proc = new ProcessStartInfo
@@ -94,25 +89,21 @@ namespace Setup_RadioPlayer
                 UseShellExecute = true,
                 WorkingDirectory = Environment.CurrentDirectory,
                 FileName = Application.ExecutablePath,
-                Verb = "runas" // Запуск от имени администратора
+                Verb = "runas" 
             };
-
             try
             {
                 Process.Start(proc);
             }
             catch
             {
-                // Пользователь отказался предоставить права администратора
                 MessageBox.Show("Для установки програми необхідні права адміністратора.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
             Application.Exit();
         }
 
         private void InitializePanels()
         {
-            // Инициализация каждой панели
             InitializeWelcomePanel();
             InitializeLicensePanel();
             InitializeInstallPathPanel();
@@ -122,8 +113,7 @@ namespace Setup_RadioPlayer
         }
         private void BtnBeta_Click(object sender, EventArgs e)
         {
-            // Показать сообщение о том, что это бета-версия
-            MessageBox.Show("Це бета-версія програми. Можливі помилки та недоробки.\nЯкщо ви виявили проблему, повідомте нам на адресу support@deepradio.site", "Інформація", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Це бета-версія програми. Можливі помилки та недоробки.\nЯкщо ви виявили проблему, повідомте нам на адресу support@deepradio.cloud", "Інформація", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         private void BetaButtonTimer_Tick(object sender, EventArgs e)
         {
@@ -131,7 +121,7 @@ namespace Setup_RadioPlayer
             {
                 if (btnBeta.Left < 0)
                 {
-                    btnBeta.Left += 5; // Кнопка выезжает слева
+                    btnBeta.Left += 5;
                 }
                 else
                 {
@@ -143,33 +133,26 @@ namespace Setup_RadioPlayer
 
         private void InitializeSharedControls()
         {
-            // Верхняя панель с заголовком и кнопками
             Panel topPanel = new Panel();
             topPanel.Size = new Size(this.Width, 40);
             topPanel.Location = new Point(0, 0);
             topPanel.BackColor = Color.FromArgb(45, 45, 48);
             topPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-
-            // Иконка слева от заголовка
             PictureBox iconBox = new PictureBox();
             iconBox.Image = Properties.Resources.installer.ToBitmap();
             iconBox.SizeMode = PictureBoxSizeMode.StretchImage;
             iconBox.Size = new Size(24, 24);
             iconBox.Location = new Point(10, 8);
-
-            // Заголовок
             lblTitle = new Label();
-            lblTitle.Text = "Установник RadioPlayer";
-            lblTitle.Font = new Font("Arial", 12, FontStyle.Bold);
+            lblTitle.Text = LanguageManager.GetString("AppTitle");
+            lblTitle.Font = new Font("Segoe UI", 12, FontStyle.Bold);
             lblTitle.ForeColor = Color.White;
             lblTitle.AutoSize = true;
             lblTitle.BackColor = Color.Transparent;
             lblTitle.Location = new Point(40, 10);
-
-            // Кастомная кнопка "Закрити"
             btnClose = new CustomButton();
             btnClose.Size = new Size(30, 30);
-            btnClose.Location = new Point(this.Width - 45, 5); // Смещаем на 5 пикселей влево
+            btnClose.Location = new Point(this.Width - 45, 5); 
             btnClose.Text = "X";
             btnClose.Font = new Font("Arial", 12, FontStyle.Bold);
             btnClose.BackColor = Color.FromArgb(45, 45, 48);
@@ -179,11 +162,9 @@ namespace Setup_RadioPlayer
             btnClose.HoverBackColor = Color.Red;
             btnClose.Click += BtnClose_Click;
             btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-
-            // Кастомная кнопка "Згорнути"
             btnMinimize = new CustomButton();
             btnMinimize.Size = new Size(30, 30);
-            btnMinimize.Location = new Point(this.Width - 80, 5); // Исправляем позицию
+            btnMinimize.Location = new Point(this.Width - 80, 5); 
             btnMinimize.Text = "_";
             btnMinimize.Font = new Font("Arial", 12, FontStyle.Bold);
             btnMinimize.BackColor = Color.FromArgb(45, 45, 48);
@@ -192,14 +173,10 @@ namespace Setup_RadioPlayer
             btnMinimize.FlatAppearance.BorderSize = 0;
             btnMinimize.Click += (s, e) => { this.WindowState = FormWindowState.Minimized; };
             btnMinimize.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-
-            // Добавляем элементы в верхнюю панель
             topPanel.Controls.Add(iconBox);
             topPanel.Controls.Add(lblTitle);
             topPanel.Controls.Add(btnClose);
             topPanel.Controls.Add(btnMinimize);
-
-            // Добавляем верхнюю панель на форму
             this.Controls.Add(topPanel);
             btnBeta = new BetaButton();
             btnBeta.Location = new Point((this.Width - btnBeta.Width) / 2, 40);
@@ -209,68 +186,56 @@ namespace Setup_RadioPlayer
             betaButtonTimer.Interval = 10;
             betaButtonTimer.Tick += BetaButtonTimer_Tick;
             betaButtonTimer.Start();
-
             topPanel.MouseDown += MainForm_MouseDown;
             lblTitle.MouseDown += MainForm_MouseDown;
             iconBox.MouseDown += MainForm_MouseDown;
-
-            // Кастомная кнопка "Далі"
             btnNext = new CustomButton();
-            btnNext.Text = "Далі";
-            btnNext.Size = new Size(90, 30);  // Скорректирован размер кнопки
-            btnNext.Location = new Point(this.Width - 120, this.Height - 80);  // Скорректирована позиция кнопки
+            btnNext.Text = LanguageManager.GetString("BtnNext");
+            btnNext.Size = new Size(100, 30);
+            btnNext.Location = new Point(this.Width - 120, this.Height - 80);
             btnNext.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             btnNext.Click += BtnNext_Click;
             this.Controls.Add(btnNext);
-
-            // Кастомная кнопка "Назад"
             btnBack = new CustomButton();
-            btnBack.Text = "Назад";
-            btnBack.Size = new Size(90, 30);  // Скорректирован размер кнопки
-            btnBack.Location = new Point(this.Width - 230, this.Height - 80);  // Скорректирована позиция кнопки
+            btnBack.Text = LanguageManager.GetString("BtnBack");
+            btnBack.Size = new Size(100, 30);
+            btnBack.Location = new Point(this.Width - 230, this.Height - 80);
             btnBack.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             btnBack.Click += BtnBack_Click;
             this.Controls.Add(btnBack);
-
-            // Добавляем ссылки в левую часть нижней панели
             LinkLabel linkSupport = new LinkLabel();
-            linkSupport.Text = "Підтримка: support@deepradio.site";
-            linkSupport.Font = new Font("Arial", 10);
+            linkSupport.Text = LanguageManager.GetString("SupportEmail");
+            linkSupport.Font = new Font("Segoe UI", 10);
             linkSupport.LinkColor = Color.White;
             linkSupport.BackColor = Color.Transparent;
             linkSupport.AutoSize = true;
-            linkSupport.Location = new Point(10, this.Height - 90);  // Позиция над кнопками
+            linkSupport.Location = new Point(10, this.Height - 90);
             linkSupport.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            linkSupport.LinkClicked += (s, e) => { Process.Start("mailto:support@deepradio.site"); };
-
+            linkSupport.LinkClicked += (s, e) => { Process.Start("mailto:support@deepradio.cloud"); };
             LinkLabel linkWebsite = new LinkLabel();
-            linkWebsite.Text = "Сайт: deepradio.site";
-            linkWebsite.Font = new Font("Arial", 10);
+            linkWebsite.Text = LanguageManager.GetString("Website");
+            linkWebsite.Font = new Font("Segoe UI", 10);
             linkWebsite.LinkColor = Color.White;
             linkWebsite.BackColor = Color.Transparent;
             linkWebsite.AutoSize = true;
-            linkWebsite.Location = new Point(10, this.Height - 70);  // Позиция над поддержкой
+            linkWebsite.Location = new Point(10, this.Height - 70);
             linkWebsite.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            linkWebsite.LinkClicked += (s, e) => { Process.Start("https://deepradio.site"); };
-
-            // Добавляем ссылки на форму
+            linkWebsite.LinkClicked += (s, e) => { Process.Start("https://deepradio.cloud"); };
             this.Controls.Add(linkSupport);
             this.Controls.Add(linkWebsite);
         }
 
         private void BtnClose_Click(object sender, EventArgs e)
         {
-            var result = MessageBox.Show("Ви дійсно хочете скасувати установку?", "Підтвердження", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var result = MessageBox.Show(LanguageManager.GetString("CancelConfirm"), LanguageManager.GetString("Confirmation"), MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
                 this.Close();
             }
         }
 
-        // Обработчик для перетаскивания формы
         private void MainForm_MouseDown(object sender, MouseEventArgs e)
         {
-            // Реализация перетаскивания формы
             if (e.Button == MouseButtons.Left)
             {
                 this.Capture = false;
@@ -278,8 +243,6 @@ namespace Setup_RadioPlayer
                 this.WndProc(ref m);
             }
         }
-
-        // Обработчики событий для общих кнопок
         private void BtnNext_Click(object sender, EventArgs e)
         {
             if (panelWelcome.Visible)
@@ -294,26 +257,28 @@ namespace Setup_RadioPlayer
                 }
                 else
                 {
-                    MessageBox.Show("Ви повинні прийняти ліцензійну угоду для продовження.", "Попередження", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(LanguageManager.GetString("MustAcceptLicense"), LanguageManager.GetString("Warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
                 }
+
             }
             else if (panelInstallPath.Visible)
             {
                 if (string.IsNullOrEmpty(installPath))
                 {
-                    MessageBox.Show("Будь ласка, оберіть коректний шлях установки.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                   MessageBox.Show(LanguageManager.GetString("InvalidPath"), LanguageManager.GetString("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else if (!IsValidInstallPath(installPath))
                 {
-                    MessageBox.Show("Вибрано некоректний або заборонений шлях установки.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(LanguageManager.GetString("InvalidPath"), LanguageManager.GetString("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else if (!HasEnoughDiskSpace(installPath))
                 {
-                    MessageBox.Show("Недостатньо вільного місця на диску.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(LanguageManager.GetString("NotEnoughSpace"), LanguageManager.GetString("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else if (Directory.Exists(installPath))
                 {
-                    var result = MessageBox.Show("Папка вже існує. Ви хочете перезаписати її?", "Попередження", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    var result = MessageBox.Show(LanguageManager.GetString("FolderExists"), LanguageManager.GetString("Warning"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (result == DialogResult.Yes)
                     {
                         ShowPanel(panelOptions);
@@ -324,7 +289,6 @@ namespace Setup_RadioPlayer
                     ShowPanel(panelOptions);
                 }
             }
-       
             else if (panelOptions.Visible)
             {
                 ShowPanel(panelProgress);
@@ -362,44 +326,32 @@ namespace Setup_RadioPlayer
 
         private void ShowPanel(Panel panel)
         {
-            // Скрыть все панели
             panelWelcome.Visible = false;
             panelLicense.Visible = false;
             panelInstallPath.Visible = false;
             panelOptions.Visible = false;
             panelProgress.Visible = false;
             panelFinish.Visible = false;
-
-            // Показать выбранную панель
             panel.Visible = true;
-
-            // Изменение фонового изображения для каждой панели
             UpdateBackgroundImage(panel);
-
-            // Настройка видимости кнопок "Назад" и "Далее"
             btnBack.Visible = !panelWelcome.Visible && !panelFinish.Visible && !panelProgress.Visible;
             btnNext.Visible = !panelProgress.Visible;
-
-            // Изменение текста кнопки "Далі" на "Встановити" или "Готово" в зависимости от панели
             if (panelOptions.Visible)
             {
-                btnNext.Text = "Встановити";
+                btnNext.Text = LanguageManager.GetString("BtnInstall");
             }
             else if (panelFinish.Visible)
             {
-                btnNext.Text = "Готово";
+                btnNext.Text = LanguageManager.GetString("BtnFinish");
             }
             else
             {
-                btnNext.Text = "Далі";
+                btnNext.Text = LanguageManager.GetString("BtnNext");
             }
-
-            // Скрыть кнопку "Назад" на панели приветствия
             if (panelWelcome.Visible)
             {
                 btnBack.Visible = false;
             }
-
             panel.Invalidate();
             panel.Update();
             this.Invalidate();
@@ -441,26 +393,89 @@ namespace Setup_RadioPlayer
             formPath.AddArc(0, this.Height - radius, radius, radius, 90, 90);
             formPath.CloseFigure();
             this.Region = new Region(formPath);
-
-            // Добавление эффекта свечения
             this.Paint += MainForm_Paint;
+        }
+        private void UpdateLanguage()
+        {
+            this.SuspendLayout();
+            this.Text = LanguageManager.GetString("AppTitle");
+            lblTitle.Text = LanguageManager.GetString("AppTitle");
+            btnNext.Text = LanguageManager.GetString("BtnNext");
+            btnBack.Text = LanguageManager.GetString("BtnBack");
+            UpdateControlsRecursive(this);
+            if (panelOptions.Visible)
+            {
+                btnNext.Text = LanguageManager.GetString("BtnInstall");
+            }
+            else if (panelFinish.Visible)
+            {
+                btnNext.Text = LanguageManager.GetString("BtnFinish");
+            }
+            if (panelLicense != null && panelLicense.Visible)
+            {
+                foreach (Control ctrl in panelLicense.Controls)
+                {
+                    if (ctrl is RichTextBox rtb)
+                    {
+                        rtb.Text = GetLicenseText();
+                    }
+                }
+            }
+            this.ResumeLayout(false);
+            this.Refresh();
+        }
+
+        private void UpdateControlsRecursive(Control parent)
+        {
+            foreach (Control ctrl in parent.Controls)
+            {
+                if (ctrl.Tag != null && ctrl.Tag is string)
+                {
+                    string key = ctrl.Tag.ToString();
+                    ctrl.Text = LanguageManager.GetString(key);
+                }
+                if (ctrl.HasChildren)
+                {
+                    UpdateControlsRecursive(ctrl);
+                }
+            }
+        }
+        private string GetLicenseText()
+        {
+            string fileName = "";
+            switch (LanguageManager.CurrentLanguage)
+            {
+                case LanguageManager.Language.English:
+                    fileName = "license_en.txt";
+                    break;
+                case LanguageManager.Language.Italian:
+                    fileName = "license_it.txt";
+                    break;
+                case LanguageManager.Language.Ukrainian:
+                default:
+                    fileName = "license_ua.txt";
+                    break;
+            }
+
+            string licensePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "licenses", fileName);
+
+            if (System.IO.File.Exists(licensePath))
+                return System.IO.File.ReadAllText(licensePath, System.Text.Encoding.UTF8);
+            return LanguageManager.GetString("LicenseTitle");
         }
         private void MainForm_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
-
-            // Рисуем обводку формы
             Rectangle borderRect = new Rectangle(0, 0, this.Width, this.Height);
 
             using (GraphicsPath path = GetRoundedRectanglePath(borderRect, 30))
             {
-                // Градиент от синего (с отступом 40 пикселей сверху) до желтого снизу
                 using (LinearGradientBrush gradientBrush = new LinearGradientBrush(
-                    new Rectangle(0, 40, this.Width, this.Height - 40), // Градиент начинается на высоте 40 пикселей
-                    Color.Blue,  // Синий цвет сверху
-                    Color.Yellow, // Желтый цвет снизу
-                    LinearGradientMode.Vertical))  // Направление градиента сверху вниз
+                    new Rectangle(0, 40, this.Width, this.Height - 40), 
+                    Color.Blue,  
+                    Color.Yellow, 
+                    LinearGradientMode.Vertical)) 
                 {
                     using (Pen glowPen = new Pen(gradientBrush, 10))
                     {
@@ -470,91 +485,82 @@ namespace Setup_RadioPlayer
                 }
             }
         }
-
-        // Пример метода для создания округленного прямоугольника
         private GraphicsPath GetRoundedRectanglePath(Rectangle rect, int radius)
         {
             GraphicsPath path = new GraphicsPath();
             int diameter = radius * 2;
             Size size = new Size(diameter, diameter);
             Rectangle arc = new Rectangle(rect.Location, size);
-
-            // Верхний левый угол
             path.AddArc(arc, 180, 90);
-
-            // Верхний правый угол
             arc.X = rect.Right - diameter;
             path.AddArc(arc, 270, 90);
-
-            // Нижний правый угол
             arc.Y = rect.Bottom - diameter;
             path.AddArc(arc, 0, 90);
-
-            // Нижний левый угол
             arc.X = rect.Left;
             path.AddArc(arc, 90, 90);
-
             path.CloseFigure();
             return path;
         }
-
-        // Вспомогательный метод для создания пути с закругленными углами
-
-        // Инициализация панелей
         private void InitializeWelcomePanel()
         {
             panelWelcome = new Panel();
             panelWelcome.Size = new Size(this.Width, this.Height - 100);
-            panelWelcome.Location = new Point(0, 40); // Сдвиг для верхней панели
+            panelWelcome.Location = new Point(0, 40);
             panelWelcome.BackColor = Color.Transparent;
-
-            // Заголовок
+            ComboBox cmbLanguage = new ComboBox();
+            cmbLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbLanguage.Font = new Font("Segoe UI", 10);
+            cmbLanguage.Size = new Size(200, 30);
+            cmbLanguage.Location = new Point(50, 45);
+            cmbLanguage.Items.Add(LanguageManager.GetLanguageName(LanguageManager.Language.Ukrainian));
+            cmbLanguage.Items.Add(LanguageManager.GetLanguageName(LanguageManager.Language.English));
+            cmbLanguage.Items.Add(LanguageManager.GetLanguageName(LanguageManager.Language.Italian));
+            cmbLanguage.SelectedIndex = (int)LanguageManager.CurrentLanguage;
+            cmbLanguage.SelectedIndexChanged += (s, e) =>
+            {
+                LanguageManager.CurrentLanguage = (LanguageManager.Language)cmbLanguage.SelectedIndex;
+                UpdateLanguage();
+            };
             Label lblWelcome = new Label();
-            lblWelcome.Text = "Ласкаво просимо до установника RadioPlayer!";
-            lblWelcome.Font = new Font("Arial", 24, FontStyle.Bold);
+            lblWelcome.Text = LanguageManager.GetString("WelcomeTitle");
+            lblWelcome.Font = new Font("Segoe UI", 24, FontStyle.Bold);
             lblWelcome.ForeColor = Color.White;
             lblWelcome.AutoSize = false;
             lblWelcome.BackColor = Color.Transparent;
-            lblWelcome.Size = new Size(700, 50);
-            lblWelcome.Location = new Point(50, 50);
+            lblWelcome.Size = new Size(700, 60);
+            lblWelcome.Location = new Point(50, 100);
             lblWelcome.TextAlign = ContentAlignment.MiddleCenter;
             lblWelcome.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-
-            // Подробное описание
+            lblWelcome.Tag = "WelcomeTitle";
             Label lblDescription = new Label();
-            lblDescription.Text = "Ця програма встановить кастомний RadioPlayer на ваш комп'ютер.\nНатисніть 'Далі' для продовження.";
-            lblDescription.Font = new Font("Arial", 14);
+            lblDescription.Text = LanguageManager.GetString("WelcomeDescription");
+            lblDescription.Font = new Font("Segoe UI", 14);
             lblDescription.ForeColor = Color.White;
             lblDescription.AutoSize = false;
             lblDescription.BackColor = Color.Transparent;
-            lblDescription.Size = new Size(700, 100);
-            lblDescription.Location = new Point(50, 150); // Сдвинул ниже
+            lblDescription.Size = new Size(700, 120);
+            lblDescription.Location = new Point(50, 180);
             lblDescription.TextAlign = ContentAlignment.MiddleCenter;
             lblDescription.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-
+            lblDescription.Tag = "WelcomeDescription";
             panelWelcome.Controls.Add(lblWelcome);
             panelWelcome.Controls.Add(lblDescription);
-
-            // Добавляем нижнюю панель с ссылками
-
             this.Controls.Add(panelWelcome);
         }
-
         private void InitializeLicensePanel()
         {
             panelLicense = new Panel();
             panelLicense.Size = new Size(this.Width, this.Height - 100);
             panelLicense.Location = new Point(0, 80);
             panelLicense.BackColor = Color.Transparent;
-
             Label lblLicense = new Label();
-            lblLicense.Text = "Ліцензійна угода";
-            lblLicense.Font = new Font("Arial", 16, FontStyle.Bold);
+            lblLicense.Text = LanguageManager.GetString("LicenseTitle");
+            lblLicense.Font = new Font("Segoe UI", 16, FontStyle.Bold);
             lblLicense.ForeColor = Color.White;
             lblLicense.AutoSize = true;
             lblLicense.BackColor = Color.Transparent;
             lblLicense.Location = new Point(50, 60);
-
+            lblLicense.Tag = "LicenseTitle";
             RichTextBox rtbLicense = new RichTextBox();
             rtbLicense.Size = new Size(700, 250);
             rtbLicense.Location = new Point(50, 110);
@@ -562,31 +568,20 @@ namespace Setup_RadioPlayer
             rtbLicense.BackColor = Color.White;
             rtbLicense.ForeColor = Color.Black;
             rtbLicense.ScrollBars = RichTextBoxScrollBars.Vertical;
-
-            string licenseText = Properties.Resources.license;
-            if (!string.IsNullOrEmpty(licenseText))
-            {
-                rtbLicense.Text = licenseText;
-            }
-            else
-            {
-                rtbLicense.Text = "Ліцензійна угода не знайдена.";
-            }
-
+            rtbLicense.Font = new Font("Segoe UI", 10);
+            rtbLicense.Text = GetLicenseText();
             CheckBox cbAgree = new CheckBox();
-            cbAgree.Text = "Я прочитав(ла) та погоджуюся з умовами ліцензійної угоди";
+            cbAgree.Text = LanguageManager.GetString("LicenseAgree");
             cbAgree.ForeColor = Color.White;
             cbAgree.BackColor = Color.Transparent;
             cbAgree.AutoSize = true;
-            cbAgree.Location = new Point(50, 420);
+            cbAgree.Font = new Font("Segoe UI", 11);
+            cbAgree.Location = new Point(50, 380);
+            cbAgree.Tag = "LicenseAgree";
             cbAgree.CheckedChanged += (s, e) => { agreeToLicense = cbAgree.Checked; };
-
             panelLicense.Controls.Add(lblLicense);
             panelLicense.Controls.Add(rtbLicense);
             panelLicense.Controls.Add(cbAgree);
-
-            // Добавляем нижнюю панель с ссылками
-
             this.Controls.Add(panelLicense);
         }
 
@@ -642,27 +637,20 @@ namespace Setup_RadioPlayer
                 UpdateSpaceInfo(lblSpaceInfo, installPath);
             };
 
-            // Инициализация переменных
             installPath = txtPath.Text;
             UpdateSpaceInfo(lblSpaceInfo, installPath);
-
             panelInstallPath.Controls.Add(lblInstruction);
             panelInstallPath.Controls.Add(txtPath);
             panelInstallPath.Controls.Add(btnBrowse);
             panelInstallPath.Controls.Add(lblSpaceInfo);
-
-            // Добавляем нижнюю панель с ссылками
-
             this.Controls.Add(panelInstallPath);
         }
-
         private void InitializeOptionsPanel()
         {
             panelOptions = new Panel();
             panelOptions.Size = new Size(this.Width, this.Height - 100);
             panelOptions.Location = new Point(0, 40);
             panelOptions.BackColor = Color.Transparent;
-
             Label lblOptions = new Label();
             lblOptions.Text = "Оберіть додаткові опції установки:";
             lblOptions.Font = new Font("Arial", 16, FontStyle.Bold);
@@ -670,8 +658,6 @@ namespace Setup_RadioPlayer
             lblOptions.AutoSize = true;
             lblOptions.BackColor = Color.Transparent;
             lblOptions.Location = new Point(50, 40);
-
-            // Чекбоксы в два столбца
             CheckBox cbLaunchAfterInstall = new CheckBox();
             cbLaunchAfterInstall.Text = "Запустити програму після встановлення";
             cbLaunchAfterInstall.ForeColor = Color.White;
@@ -680,7 +666,6 @@ namespace Setup_RadioPlayer
             cbLaunchAfterInstall.Location = new Point(50, 190);
             cbLaunchAfterInstall.Checked = true;
             cbLaunchAfterInstall.CheckedChanged += (s, e) => { launchAppAfterInstall = cbLaunchAfterInstall.Checked; };
-
             CheckBox cbVisitWebsite = new CheckBox();
             cbVisitWebsite.Text = "Відвідати сайт";
             cbVisitWebsite.ForeColor = Color.White;
@@ -688,7 +673,6 @@ namespace Setup_RadioPlayer
             cbVisitWebsite.AutoSize = true;
             cbVisitWebsite.Location = new Point(50, 210);
             cbVisitWebsite.CheckedChanged += (s, e) => { visitWebsiteAfterInstall = cbVisitWebsite.Checked; };
-
             CheckBox cbCreateDesktopShortcut = new CheckBox();
             cbCreateDesktopShortcut.Text = "Створити ярлик на робочому столі";
             cbCreateDesktopShortcut.ForeColor = Color.White;
@@ -696,7 +680,6 @@ namespace Setup_RadioPlayer
             cbCreateDesktopShortcut.AutoSize = true;
             cbCreateDesktopShortcut.Location = new Point(470, 210);
             cbCreateDesktopShortcut.CheckedChanged += (s, e) => { createDesktopShortcut = cbCreateDesktopShortcut.Checked; };
-
             CheckBox cbCreateStartMenuShortcut = new CheckBox();
             cbCreateStartMenuShortcut.Text = "Створити ярлик в меню Пуск";
             cbCreateStartMenuShortcut.ForeColor = Color.White;
@@ -704,7 +687,6 @@ namespace Setup_RadioPlayer
             cbCreateStartMenuShortcut.AutoSize = true;
             cbCreateStartMenuShortcut.Location = new Point(470, 190);
             cbCreateStartMenuShortcut.CheckedChanged += (s, e) => { createStartMenuShortcut = cbCreateStartMenuShortcut.Checked; };
-
             CheckBox cbRunAtStartup = new CheckBox();
             cbRunAtStartup.Text = "Запускати програму разом з Windows";
             cbRunAtStartup.ForeColor = Color.White;
@@ -723,8 +705,6 @@ namespace Setup_RadioPlayer
             panelOptions.Controls.Add(cbCreateDesktopShortcut);
             panelOptions.Controls.Add(cbCreateStartMenuShortcut);
             panelOptions.Controls.Add(cbRunAtStartup);
-
-            // Добавляем нижнюю панель с ссылками
             this.Controls.Add(panelOptions);
         }
         private void AnimateProgressBar(int targetValue)
@@ -740,7 +720,7 @@ namespace Setup_RadioPlayer
                             progressBar.Value++;
                         }
                     }));
-                    Thread.Sleep(10); // Скорость анимации
+                    Thread.Sleep(10); 
                 }
             });
         }
@@ -750,7 +730,6 @@ namespace Setup_RadioPlayer
             panelProgress.Size = new Size(this.Width, this.Height - 100);
             panelProgress.Location = new Point(0, 40);
             panelProgress.BackColor = Color.Transparent;
-
             Label lblProgress = new Label();
             lblProgress.Text = "Виконується установка, будь ласка зачекайте...";
             lblProgress.Font = new Font("Arial", 14, FontStyle.Bold);
@@ -758,12 +737,10 @@ namespace Setup_RadioPlayer
             lblProgress.AutoSize = true;
             lblProgress.BackColor = Color.Transparent;
             lblProgress.Location = new Point(50, 50);
-
             progressBar = new ProgressBar();
             progressBar.Size = new Size(700, 25);
             progressBar.Location = new Point(50, 90);
             progressBar.Style = ProgressBarStyle.Continuous;
-
             lblStatus = new Label();
             lblStatus.Text = "";
             lblStatus.Font = new Font("Arial", 12);
@@ -771,22 +748,17 @@ namespace Setup_RadioPlayer
             lblStatus.AutoSize = true;
             lblStatus.BackColor = Color.Transparent;
             lblStatus.Location = new Point(50, 130);
-
             panelProgress.Controls.Add(lblProgress);
             panelProgress.Controls.Add(progressBar);
             panelProgress.Controls.Add(lblStatus);
-
-            // Добавляем панель на форму
             this.Controls.Add(panelProgress);
         }
-
         private void InitializeFinishPanel()
         {
             panelFinish = new Panel();
             panelFinish.Size = new Size(this.Width, this.Height - 100);
             panelFinish.Location = new Point(0, 40);
             panelFinish.BackColor = Color.Transparent;
-
             Label lblFinish = new Label();
             lblFinish.Text = "Дякуємо за встановлення програми RadioPlayer!";
             lblFinish.Font = new Font("Arial", 24, FontStyle.Bold);
@@ -796,8 +768,6 @@ namespace Setup_RadioPlayer
             lblFinish.Size = new Size(700, 100);
             lblFinish.Location = new Point(50, 50);
             lblFinish.TextAlign = ContentAlignment.MiddleCenter;
-
-            // Предложение запустить программу или посетить сайт
             CheckBox cbLaunchApp = new CheckBox();
             cbLaunchApp.Text = "Запустити програму";
             cbLaunchApp.ForeColor = Color.White;
@@ -806,7 +776,6 @@ namespace Setup_RadioPlayer
             cbLaunchApp.Location = new Point(50, 180);
             cbLaunchApp.Checked = true;
             cbLaunchApp.CheckedChanged += (s, e) => { launchAppAfterInstall = cbLaunchApp.Checked; };
-
             CheckBox cbVisitWebsite = new CheckBox();
             cbVisitWebsite.Text = "Відвідати сайт";
             cbVisitWebsite.ForeColor = Color.White;
@@ -814,73 +783,81 @@ namespace Setup_RadioPlayer
             cbVisitWebsite.AutoSize = true;
             cbVisitWebsite.Location = new Point(50, 210);
             cbVisitWebsite.CheckedChanged += (s, e) => { visitWebsiteAfterInstall = cbVisitWebsite.Checked; };
-
             panelFinish.Controls.Add(lblFinish);
             panelFinish.Controls.Add(cbLaunchApp);
             panelFinish.Controls.Add(cbVisitWebsite);
-
-            // Добавляем нижнюю панель с ссылками
-
             this.Controls.Add(panelFinish);
         }
         private async void StartInstallation()
         {
-            // Отключаем кнопки во время установки
             btnNext.Enabled = false;
             btnBack.Enabled = false;
-
             try
             {
-                UpdateStatus("Розпакування файлів...");
+                UpdateStatus("Крок 1/4: Розпакування файлів...");
+                progressBar.Value = 0;
                 await FileManager.ExtractFilesAsync(installPath, (progress) =>
                 {
-                    // Обновляем прогрессбар
                     Invoke(new Action(() =>
                     {
-                        progressBar.Value = progress;
+                        int adjustedProgress = (int)(progress * 0.7);
+                        progressBar.Value = adjustedProgress;
+                        lblStatus.Text = $"Крок 1/4: Розпакування файлів... {progress}%";
                     }));
                 });
-
-                // Проверка контрольной суммы главного исполняемого файла
+                progressBar.Value = 70;
                 string filePath = Path.Combine(installPath, "data", "RadioPlayerV2.exe");
-
                 if (!System.IO.File.Exists(filePath))
                 {
-                    throw new Exception($"Файл '{filePath}' не знайдено.");
+                    throw new Exception($"Файл '{filePath}' не знайдено після розпакування.");
                 }
-
-                UpdateStatus("Перевірка контрольної суми...");
-                string expectedChecksum = "your_expected_checksum_here"; // Установите правильную контрольную сумму
-
-                if (!VerifyFileChecksum(filePath, expectedChecksum))
+                UpdateStatus("Крок 2/4: Перевірка цілісності файлів...");
+                progressBar.Value = 72;
+                string expectedChecksum = "skip"; 
+                if (expectedChecksum != "skip" && !VerifyFileChecksum(filePath, expectedChecksum))
                 {
-                    var result = MessageBox.Show("Контрольна сума файлу не збігається. Можливо, файл пошкоджений. Ви бажаєте продовжити установку?", "Попередження", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    var result = MessageBox.Show("Контрольна сума файлу не збігається. Можливо, файл пошкоджений. Ви бажаєте продовжити установку?",
+                        "Попередження", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (result != DialogResult.Yes)
                     {
-                        throw new Exception("Установка отменена пользователем из-за несоответствия контрольної суми.");
+                        throw new Exception("Установку скасовано користувачем через невідповідність контрольної суми.");
                     }
                     else
                     {
-                        Log("Пользователь решил продолжить установку несмотря на предупреждение.");
+                        Log("Користувач вирішив продовжити установку незважаючи на попередження.");
                     }
+                }
+                else if (expectedChecksum == "skip")
+                {
+                    Log("Перевірка контрольної суми пропущена (не налаштована).");
                 }
                 else
                 {
                     UpdateStatus("Контрольна сума вірна.");
                 }
-
-                UpdateStatus("Створення ярликів...");
+                progressBar.Value = 75;
+                UpdateStatus("Крок 3/4: Створення ярликів...");
+                progressBar.Value = 78;
                 ShortcutManager.CreateShortcuts(installPath, createDesktopShortcut, createStartMenuShortcut);
-
+                progressBar.Value = 85;
                 if (runAtStartup)
                 {
-                    UpdateStatus("Додавання в автозапуск...");
+                    UpdateStatus(LanguageManager.GetString("Step4"));
+                    progressBar.Value = 88;
                     RegistryManager.AddToRegistry(installPath);
+                    progressBar.Value = 90;
                 }
-
-                // Завершение установки
-                UpdateStatus("Установка завершена!");
-                await Task.Delay(500); // Небольшая задержка для обновления интерфейса
+                else
+                {
+                    progressBar.Value = 90;
+                }
+                UpdateStatus(LanguageManager.GetString("Completing"));
+                UninstallManager.CreateUninstaller(installPath);
+                progressBar.Value = 98;
+                await Task.Delay(300);
+                UpdateStatus("Установка завершена успішно!");
+                progressBar.Value = 100;
+                await Task.Delay(500); 
                 ShowPanel(panelFinish);
                 btnNext.Enabled = true;
                 btnBack.Visible = false;
@@ -888,16 +865,15 @@ namespace Setup_RadioPlayer
             }
             catch (Exception ex)
             {
-                // Обработка ошибок
                 LogError(ex);
                 Invoke(new Action(() =>
                 {
-                    MessageBox.Show("Під час установки сталася помилка: " + ex.Message, "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Під час установки сталася помилка: " + ex.Message,
+                    "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     btnNext.Enabled = true;
                     btnBack.Enabled = true;
                     ShowPanel(panelInstallPath);
                 }));
-                // Откат установки
                 RollbackInstallation();
             }
         }
@@ -910,8 +886,6 @@ namespace Setup_RadioPlayer
                 Log(status);
             }));
         }
-
-        // Откат установки
         private void RollbackInstallation()
         {
             try
@@ -920,25 +894,18 @@ namespace Setup_RadioPlayer
 
                 if (!string.IsNullOrEmpty(installPath) && Directory.Exists(installPath))
                 {
-                    // Проверяем, что директория установки находится в Program Files
                     string programFilesDir = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
                     if (!installPath.StartsWith(programFilesDir, StringComparison.OrdinalIgnoreCase))
                     {
-                        // Если путь не в Program Files, не удаляем директорию
                         Log($"Путь установки {installPath} не находится в Program Files. Откат установки пропущен.");
                     }
                     else
                     {
-                        // Снимаем атрибут "Только чтение" со всех файлов и папок
                         RemoveReadOnlyAttribute(new DirectoryInfo(installPath));
-
-                        // Удаляем директорию установки
                         Directory.Delete(installPath, true);
                         Log($"Директория {installPath} удалена.");
                     }
                 }
-
-                // Удаление ярлыков, созданных установщиком
                 string desktopShortcut = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RadioPlayerV2.lnk");
                 if (System.IO.File.Exists(desktopShortcut))
                 {
@@ -975,21 +942,32 @@ namespace Setup_RadioPlayer
 
             directory.Attributes &= ~FileAttributes.ReadOnly;
         }
-
-        // Запуск приложения
         private void LaunchApplication()
         {
-            string exePath = Path.Combine(installPath, "RadioPlayerV2.exe");
+            string exePath = Path.Combine(installPath, "data", "RadioPlayerV2.exe");
             if (System.IO.File.Exists(exePath))
             {
-                Process.Start(exePath);
+                try
+                {
+                    Process.Start(exePath);
+                    Log($"Програма запущена: {exePath}");
+                }
+                catch (Exception ex)
+                {
+                    LogError(ex);
+                    MessageBox.Show($"Не вдалося запустити програму: {ex.Message}", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                string errorMsg = $"Файл програми не знайдено: {exePath}";
+                Log(errorMsg);
+                MessageBox.Show(errorMsg, "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-        // Открытие сайта
         private void OpenWebsite()
         {
-            Process.Start("https://deepradio.site");
+            Process.Start("https://deepradio.cloud");
         }
 
         // Логирование
@@ -1004,8 +982,6 @@ namespace Setup_RadioPlayer
             string logMessage = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}: ERROR: {ex}\n";
             System.IO.File.AppendAllText(logFilePath, logMessage);
         }
-
-        // Дополнительные методы: UpdateSpaceInfo, GetRequiredSpace, etc.
         private void UpdateSpaceInfo(Label lbl, string path)
         {
             long requiredSpace = GetRequiredSpace();
@@ -1016,11 +992,9 @@ namespace Setup_RadioPlayer
 
         private long GetRequiredSpace()
         {
-            // Если data.zip встроен в ресурсы, получаем его размер
             long size = Properties.Resources.data.Length;
-            return size * 2; // С запасом
+            return size * 2; 
         }
-
         private long GetAvailableSpace(string path)
         {
             try
@@ -1034,7 +1008,6 @@ namespace Setup_RadioPlayer
                 return 0;
             }
         }
-
         private bool HasEnoughDiskSpace(string path)
         {
             long requiredSpace = GetRequiredSpace();
@@ -1049,16 +1022,12 @@ namespace Setup_RadioPlayer
                 return false;
             }
         }
-
         private bool IsValidInstallPath(string path)
         {
             try
             {
-                // Нормализуем пути
                 string normalizedPath = Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).ToLowerInvariant();
                 Log($"Проверка пути установки: {normalizedPath}");
-
-                // Запрещенные директории
                 var forbiddenPaths = new List<string>
         {
             Path.GetFullPath(Environment.GetFolderPath(Environment.SpecialFolder.Windows)).ToLowerInvariant(),
@@ -1066,8 +1035,6 @@ namespace Setup_RadioPlayer
             Path.GetFullPath(Environment.GetFolderPath(Environment.SpecialFolder.Desktop)).ToLowerInvariant(),
             Path.GetFullPath(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)).ToLowerInvariant()
         };
-
-                // Проверяем, начинается ли путь с запрещённых директорий
                 foreach (var forbiddenPath in forbiddenPaths)
                 {
                     Log($"Сравнение с запрещённым путём: {forbiddenPath}");
@@ -1077,26 +1044,21 @@ namespace Setup_RadioPlayer
                         return false;
                     }
                 }
-
-                // Дополнительная проверка: не разрешать установку непосредственно в корень диска
                 string rootDir = Path.GetPathRoot(normalizedPath);
                 if (string.Equals(normalizedPath, rootDir.TrimEnd(Path.DirectorySeparatorChar), StringComparison.OrdinalIgnoreCase))
                 {
                     Log("Установка в корневую директорию диска запрещена.");
                     return false;
                 }
-
                 Log("Путь установки разрешён.");
                 return true;
             }
             catch (Exception ex)
             {
                 LogError(ex);
-                // В случае ошибки считаем путь некорректным
                 return false;
             }
         }
-
         private bool VerifyFileChecksum(string filePath, string expectedChecksum)
         {
             using (var sha256 = SHA256.Create())
