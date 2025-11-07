@@ -1,0 +1,35 @@
+CONTRATTO DI LICENZA
+Old RadioPlayer
+
+© 2025 DeepRadio. Tutti i diritti riservati.
+
+Questo contratto di licenza è un accordo legale tra l'utente (una persona fisica o giuridica) e DeepRadio riguardo all'uso del software Old RadioPlayer (di seguito - "Software").
+
+ATTENZIONE: La nuova versione di RadioPlayer è in fase di sviluppo attivo. Questa versione (Old RadioPlayer) viene fornita per l'uso fino al rilascio della nuova versione.
+
+1. CONCESSIONE DELLA LICENZA
+DeepRadio concede all'utente una licenza non esclusiva per utilizzare il Software sul proprio computer.
+
+2. RESTRIZIONI
+NON è consentito:
+- Vendere, affittare o trasferire il Software a terzi
+- Modificare, decompilare o disassemblare il Software
+- Rimuovere o modificare eventuali avvisi di copyright
+
+3. SUPPORTO
+Il supporto ufficiale è fornito tramite: support@deepradio.cloud
+Sito web ufficiale: https://deepradio.cloud
+
+4. ESCLUSIONE DI GARANZIE
+Il Software viene fornito "così com'è", senza alcuna garanzia. DeepRadio non è responsabile per eventuali danni derivanti dall'uso del Software.
+
+5. DURATA
+Questa licenza è effettiva fino alla risoluzione. È possibile risolveria in qualsiasi momento eliminando il Software dal computer.
+
+6. DISPOSIZIONI GENERALI
+Questo accordo è regolato dalle leggi dell'Ucraina.
+
+Installando o utilizzando il Software, l'utente accetta i termini di questo contratto di licenza.
+
+DeepRadio
+2025

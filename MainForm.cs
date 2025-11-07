@@ -48,33 +48,39 @@ namespace Setup_RadioPlayer
         // Конструктор формы
         public MainForm()
         {
+            string[] args = Environment.GetCommandLineArgs();
+            if (args.Length > 1 && args[1] == "/uninstall")
+            {
+                UninstallManager.Uninstall();
+                Environment.Exit(0);
+                return;
+            }
+
             if (!IsUserAdministrator())
             {
-                // Перезапуск от имени администратора
                 RestartAsAdministrator();
                 return;
             }
 
-            // Настройки формы
-            this.Text = "Установник RadioPlayer";
+            this.DoubleBuffered = true;
+            this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
+            this.UpdateStyles();
+
+            this.Text = LanguageManager.GetString("AppTitle");
             this.Size = new Size(800, 600);
-            this.FormBorderStyle = FormBorderStyle.None; // Убираем стандартные границы
+            this.FormBorderStyle = FormBorderStyle.None;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.Icon = Properties.Resources.installer;
 
-            // Устанавливаем фоновое изображение
             this.BackgroundImage = Properties.Resources.background1;
             this.BackgroundImageLayout = ImageLayout.Stretch;
 
-            // Инициализация лог файла
             logFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "install.log");
-            Log("Запуск установщика.");
+            Log("Installer started.");
 
-            // Инициализация панелей и элементов управления
             InitializeSharedControls();
             InitializePanels();
 
-            // Показать панель приветствия
             ShowPanel(panelWelcome);
         }
 
@@ -122,8 +128,7 @@ namespace Setup_RadioPlayer
         }
         private void BtnBeta_Click(object sender, EventArgs e)
         {
-            // Показать сообщение о том, что это бета-версия
-            MessageBox.Show("Це бета-версія програми. Можливі помилки та недоробки.\nЯкщо ви виявили проблему, повідомте нам на адресу support@deepradio.site", "Інформація", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(LanguageManager.GetString("BetaMessage"), LanguageManager.GetString("Information"), MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         private void BetaButtonTimer_Tick(object sender, EventArgs e)
         {
@@ -159,8 +164,8 @@ namespace Setup_RadioPlayer
 
             // Заголовок
             lblTitle = new Label();
-            lblTitle.Text = "Установник RadioPlayer";
-            lblTitle.Font = new Font("Arial", 12, FontStyle.Bold);
+            lblTitle.Text = LanguageManager.GetString("AppTitle");
+            lblTitle.Font = new Font("Segoe UI", 12, FontStyle.Bold);
             lblTitle.ForeColor = Color.White;
             lblTitle.AutoSize = true;
             lblTitle.BackColor = Color.Transparent;
@@ -216,42 +221,40 @@ namespace Setup_RadioPlayer
 
             // Кастомная кнопка "Далі"
             btnNext = new CustomButton();
-            btnNext.Text = "Далі";
-            btnNext.Size = new Size(90, 30);  // Скорректирован размер кнопки
-            btnNext.Location = new Point(this.Width - 120, this.Height - 80);  // Скорректирована позиция кнопки
+            btnNext.Text = LanguageManager.GetString("BtnNext");
+            btnNext.Size = new Size(100, 30);
+            btnNext.Location = new Point(this.Width - 120, this.Height - 80);
             btnNext.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             btnNext.Click += BtnNext_Click;
             this.Controls.Add(btnNext);
 
-            // Кастомная кнопка "Назад"
             btnBack = new CustomButton();
-            btnBack.Text = "Назад";
-            btnBack.Size = new Size(90, 30);  // Скорректирован размер кнопки
-            btnBack.Location = new Point(this.Width - 230, this.Height - 80);  // Скорректирована позиция кнопки
+            btnBack.Text = LanguageManager.GetString("BtnBack");
+            btnBack.Size = new Size(100, 30);
+            btnBack.Location = new Point(this.Width - 230, this.Height - 80);
             btnBack.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             btnBack.Click += BtnBack_Click;
             this.Controls.Add(btnBack);
 
-            // Добавляем ссылки в левую часть нижней панели
             LinkLabel linkSupport = new LinkLabel();
-            linkSupport.Text = "Підтримка: support@deepradio.site";
-            linkSupport.Font = new Font("Arial", 10);
+            linkSupport.Text = LanguageManager.GetString("SupportEmail");
+            linkSupport.Font = new Font("Segoe UI", 10);
             linkSupport.LinkColor = Color.White;
             linkSupport.BackColor = Color.Transparent;
             linkSupport.AutoSize = true;
-            linkSupport.Location = new Point(10, this.Height - 90);  // Позиция над кнопками
+            linkSupport.Location = new Point(10, this.Height - 90);
             linkSupport.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            linkSupport.LinkClicked += (s, e) => { Process.Start("mailto:support@deepradio.site"); };
+            linkSupport.LinkClicked += (s, e) => { Process.Start("mailto:support@deepradio.cloud"); };
 
             LinkLabel linkWebsite = new LinkLabel();
-            linkWebsite.Text = "Сайт: deepradio.site";
-            linkWebsite.Font = new Font("Arial", 10);
+            linkWebsite.Text = LanguageManager.GetString("Website");
+            linkWebsite.Font = new Font("Segoe UI", 10);
             linkWebsite.LinkColor = Color.White;
             linkWebsite.BackColor = Color.Transparent;
             linkWebsite.AutoSize = true;
-            linkWebsite.Location = new Point(10, this.Height - 70);  // Позиция над поддержкой
+            linkWebsite.Location = new Point(10, this.Height - 70);
             linkWebsite.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            linkWebsite.LinkClicked += (s, e) => { Process.Start("https://deepradio.site"); };
+            linkWebsite.LinkClicked += (s, e) => { Process.Start("https://deepradio.cloud"); };
 
             // Добавляем ссылки на форму
             this.Controls.Add(linkSupport);
@@ -260,7 +263,7 @@ namespace Setup_RadioPlayer
 
         private void BtnClose_Click(object sender, EventArgs e)
         {
-            var result = MessageBox.Show("Ви дійсно хочете скасувати установку?", "Підтвердження", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var result = MessageBox.Show(LanguageManager.GetString("CancelConfirm"), LanguageManager.GetString("Confirmation"), MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (result == DialogResult.Yes)
             {
                 this.Close();
@@ -294,26 +297,26 @@ namespace Setup_RadioPlayer
                 }
                 else
                 {
-                    MessageBox.Show("Ви повинні прийняти ліцензійну угоду для продовження.", "Попередження", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(LanguageManager.GetString("MustAcceptLicense"), LanguageManager.GetString("Warning"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             else if (panelInstallPath.Visible)
             {
                 if (string.IsNullOrEmpty(installPath))
                 {
-                    MessageBox.Show("Будь ласка, оберіть коректний шлях установки.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(LanguageManager.GetString("InvalidPath"), LanguageManager.GetString("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else if (!IsValidInstallPath(installPath))
                 {
-                    MessageBox.Show("Вибрано некоректний або заборонений шлях установки.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(LanguageManager.GetString("InvalidPath"), LanguageManager.GetString("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else if (!HasEnoughDiskSpace(installPath))
                 {
-                    MessageBox.Show("Недостатньо вільного місця на диску.", "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(LanguageManager.GetString("NotEnoughSpace"), LanguageManager.GetString("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else if (Directory.Exists(installPath))
                 {
-                    var result = MessageBox.Show("Папка вже існує. Ви хочете перезаписати її?", "Попередження", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    var result = MessageBox.Show(LanguageManager.GetString("FolderExists"), LanguageManager.GetString("Warning"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (result == DialogResult.Yes)
                     {
                         ShowPanel(panelOptions);
@@ -380,18 +383,17 @@ namespace Setup_RadioPlayer
             btnBack.Visible = !panelWelcome.Visible && !panelFinish.Visible && !panelProgress.Visible;
             btnNext.Visible = !panelProgress.Visible;
 
-            // Изменение текста кнопки "Далі" на "Встановити" или "Готово" в зависимости от панели
             if (panelOptions.Visible)
             {
-                btnNext.Text = "Встановити";
+                btnNext.Text = LanguageManager.GetString("BtnInstall");
             }
             else if (panelFinish.Visible)
             {
-                btnNext.Text = "Готово";
+                btnNext.Text = LanguageManager.GetString("BtnFinish");
             }
             else
             {
-                btnNext.Text = "Далі";
+                btnNext.Text = LanguageManager.GetString("BtnNext");
             }
 
             // Скрыть кнопку "Назад" на панели приветствия
@@ -505,37 +507,59 @@ namespace Setup_RadioPlayer
         {
             panelWelcome = new Panel();
             panelWelcome.Size = new Size(this.Width, this.Height - 100);
-            panelWelcome.Location = new Point(0, 40); // Сдвиг для верхней панели
+            panelWelcome.Location = new Point(0, 40);
             panelWelcome.BackColor = Color.Transparent;
 
-            // Заголовок
+            Label lblLanguage = new Label();
+            lblLanguage.Text = LanguageManager.GetString("LanguageLabel");
+            lblLanguage.Font = new Font("Segoe UI", 11, FontStyle.Bold);
+            lblLanguage.ForeColor = Color.White;
+            lblLanguage.AutoSize = true;
+            lblLanguage.BackColor = Color.Transparent;
+            lblLanguage.Location = new Point(50, 20);
+
+            ComboBox cmbLanguage = new ComboBox();
+            cmbLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbLanguage.Font = new Font("Segoe UI", 10);
+            cmbLanguage.Size = new Size(200, 30);
+            cmbLanguage.Location = new Point(50, 45);
+            cmbLanguage.Items.Add(LanguageManager.GetLanguageName(LanguageManager.Language.Ukrainian));
+            cmbLanguage.Items.Add(LanguageManager.GetLanguageName(LanguageManager.Language.English));
+            cmbLanguage.Items.Add(LanguageManager.GetLanguageName(LanguageManager.Language.Italian));
+            cmbLanguage.SelectedIndex = 0;
+            cmbLanguage.SelectedIndexChanged += (s, e) => {
+                LanguageManager.CurrentLanguage = (LanguageManager.Language)cmbLanguage.SelectedIndex;
+                UpdateLanguage();
+            };
+
             Label lblWelcome = new Label();
-            lblWelcome.Text = "Ласкаво просимо до установника RadioPlayer!";
-            lblWelcome.Font = new Font("Arial", 24, FontStyle.Bold);
+            lblWelcome.Text = LanguageManager.GetString("WelcomeTitle");
+            lblWelcome.Font = new Font("Segoe UI", 24, FontStyle.Bold);
             lblWelcome.ForeColor = Color.White;
             lblWelcome.AutoSize = false;
             lblWelcome.BackColor = Color.Transparent;
-            lblWelcome.Size = new Size(700, 50);
-            lblWelcome.Location = new Point(50, 50);
+            lblWelcome.Size = new Size(700, 60);
+            lblWelcome.Location = new Point(50, 100);
             lblWelcome.TextAlign = ContentAlignment.MiddleCenter;
             lblWelcome.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            lblWelcome.Tag = "WelcomeTitle";
 
-            // Подробное описание
             Label lblDescription = new Label();
-            lblDescription.Text = "Ця програма встановить кастомний RadioPlayer на ваш комп'ютер.\nНатисніть 'Далі' для продовження.";
-            lblDescription.Font = new Font("Arial", 14);
+            lblDescription.Text = LanguageManager.GetString("WelcomeDescription");
+            lblDescription.Font = new Font("Segoe UI", 14);
             lblDescription.ForeColor = Color.White;
             lblDescription.AutoSize = false;
             lblDescription.BackColor = Color.Transparent;
-            lblDescription.Size = new Size(700, 100);
-            lblDescription.Location = new Point(50, 150); // Сдвинул ниже
+            lblDescription.Size = new Size(700, 120);
+            lblDescription.Location = new Point(50, 180);
             lblDescription.TextAlign = ContentAlignment.MiddleCenter;
             lblDescription.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            lblDescription.Tag = "WelcomeDescription";
 
+            panelWelcome.Controls.Add(lblLanguage);
+            panelWelcome.Controls.Add(cmbLanguage);
             panelWelcome.Controls.Add(lblWelcome);
             panelWelcome.Controls.Add(lblDescription);
-
-            // Добавляем нижнюю панель с ссылками
 
             this.Controls.Add(panelWelcome);
         }
@@ -548,12 +572,13 @@ namespace Setup_RadioPlayer
             panelLicense.BackColor = Color.Transparent;
 
             Label lblLicense = new Label();
-            lblLicense.Text = "Ліцензійна угода";
-            lblLicense.Font = new Font("Arial", 16, FontStyle.Bold);
+            lblLicense.Text = LanguageManager.GetString("LicenseTitle");
+            lblLicense.Font = new Font("Segoe UI", 16, FontStyle.Bold);
             lblLicense.ForeColor = Color.White;
             lblLicense.AutoSize = true;
             lblLicense.BackColor = Color.Transparent;
             lblLicense.Location = new Point(50, 60);
+            lblLicense.Tag = "LicenseTitle";
 
             RichTextBox rtbLicense = new RichTextBox();
             rtbLicense.Size = new Size(700, 250);
@@ -562,30 +587,22 @@ namespace Setup_RadioPlayer
             rtbLicense.BackColor = Color.White;
             rtbLicense.ForeColor = Color.Black;
             rtbLicense.ScrollBars = RichTextBoxScrollBars.Vertical;
-
-            string licenseText = Properties.Resources.license;
-            if (!string.IsNullOrEmpty(licenseText))
-            {
-                rtbLicense.Text = licenseText;
-            }
-            else
-            {
-                rtbLicense.Text = "Ліцензійна угода не знайдена.";
-            }
+            rtbLicense.Font = new Font("Segoe UI", 10);
+            rtbLicense.Text = GetLicenseText();
 
             CheckBox cbAgree = new CheckBox();
-            cbAgree.Text = "Я прочитав(ла) та погоджуюся з умовами ліцензійної угоди";
+            cbAgree.Text = LanguageManager.GetString("LicenseAgree");
             cbAgree.ForeColor = Color.White;
             cbAgree.BackColor = Color.Transparent;
             cbAgree.AutoSize = true;
-            cbAgree.Location = new Point(50, 420);
+            cbAgree.Font = new Font("Segoe UI", 11);
+            cbAgree.Location = new Point(50, 380);
+            cbAgree.Tag = "LicenseAgree";
             cbAgree.CheckedChanged += (s, e) => { agreeToLicense = cbAgree.Checked; };
 
             panelLicense.Controls.Add(lblLicense);
             panelLicense.Controls.Add(rtbLicense);
             panelLicense.Controls.Add(cbAgree);
-
-            // Добавляем нижнюю панель с ссылками
 
             this.Controls.Add(panelLicense);
         }
@@ -895,23 +912,22 @@ namespace Setup_RadioPlayer
 
                 progressBar.Value = 85;
 
-                // Шаг 4: Настройка автозапуска (85-95%)
                 if (runAtStartup)
                 {
-                    UpdateStatus("Крок 4/4: Додавання в автозапуск...");
+                    UpdateStatus(LanguageManager.GetString("Step4"));
                     progressBar.Value = 88;
                     RegistryManager.AddToRegistry(installPath);
-                    progressBar.Value = 95;
+                    progressBar.Value = 90;
                 }
                 else
                 {
-                    progressBar.Value = 95;
+                    progressBar.Value = 90;
                 }
 
-                // Завершение установки (95-100%)
-                UpdateStatus("Завершення установки...");
+                UpdateStatus(LanguageManager.GetString("Completing"));
+                UninstallManager.CreateUninstaller(installPath);
                 progressBar.Value = 98;
-                await Task.Delay(300); // Небольшая задержка для плавности
+                await Task.Delay(300);
 
                 UpdateStatus("Установка завершена успішно!");
                 progressBar.Value = 100;
@@ -1040,10 +1056,9 @@ namespace Setup_RadioPlayer
             }
         }
 
-        // Открытие сайта
         private void OpenWebsite()
         {
-            Process.Start("https://deepradio.site");
+            Process.Start("https://deepradio.cloud");
         }
 
         // Логирование
@@ -1162,6 +1177,78 @@ namespace Setup_RadioPlayer
                     return fileChecksum == expectedChecksum.ToLowerInvariant();
                 }
             }
+        }
+
+        private void UpdateLanguage()
+        {
+            this.SuspendLayout();
+
+            this.Text = LanguageManager.GetString("AppTitle");
+            lblTitle.Text = LanguageManager.GetString("AppTitle");
+            btnNext.Text = LanguageManager.GetString("BtnNext");
+            btnBack.Text = LanguageManager.GetString("BtnBack");
+
+            UpdateControlsRecursive(this);
+
+            if (panelOptions.Visible)
+            {
+                if (btnNext.Text != LanguageManager.GetString("BtnInstall"))
+                {
+                    btnNext.Text = LanguageManager.GetString("BtnInstall");
+                }
+            }
+            else if (panelFinish.Visible)
+            {
+                if (btnNext.Text != LanguageManager.GetString("BtnFinish"))
+                {
+                    btnNext.Text = LanguageManager.GetString("BtnFinish");
+                }
+            }
+
+            this.ResumeLayout(false);
+            this.Refresh();
+        }
+
+        private void UpdateControlsRecursive(Control parent)
+        {
+            foreach (Control ctrl in parent.Controls)
+            {
+                if (ctrl.Tag != null && ctrl.Tag is string)
+                {
+                    string key = ctrl.Tag.ToString();
+                    ctrl.Text = LanguageManager.GetString(key);
+                }
+
+                if (ctrl.HasChildren)
+                {
+                    UpdateControlsRecursive(ctrl);
+                }
+            }
+        }
+
+        private string GetLicenseText()
+        {
+            string licenseFile = "";
+            switch (LanguageManager.CurrentLanguage)
+            {
+                case LanguageManager.Language.Ukrainian:
+                    licenseFile = "license_ua.txt";
+                    break;
+                case LanguageManager.Language.English:
+                    licenseFile = "license_en.txt";
+                    break;
+                case LanguageManager.Language.Italian:
+                    licenseFile = "license_it.txt";
+                    break;
+            }
+
+            string licensePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, licenseFile);
+            if (System.IO.File.Exists(licensePath))
+            {
+                return System.IO.File.ReadAllText(licensePath);
+            }
+
+            return LanguageManager.GetString("LicenseTitle");
         }
     }
 }
