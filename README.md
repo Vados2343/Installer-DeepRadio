@@ -296,14 +296,6 @@ All rights reserved © 2025 DeepRadio
 
  
 
-## 🎉 Acknowledgments
-
- 
-
-Thank you for using the Old RadioPlayer Installer!
-
- 
-
 ---
 
  
